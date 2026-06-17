@@ -347,7 +347,6 @@ function populateDesignationIndexNodes() {
 let currentRegionFilter = 'all';
 let currentUsiaFilter = 'all';
 let activeFeatures = new Set(); 
-let currentSortMode = 'alphabetical'; // Mode urut bawaan
 let currentSearchQuery = '';
 
 function generateFilterSelect() {
@@ -371,8 +370,8 @@ function generateFilterSelect() {
       selectRegion.appendChild(option);
     });
 
-  updateFeatureCounts();
-
+applyIntersectionFilter(true);
+  
   // 2. Event Listener Wilayah
   selectRegion.addEventListener('change', function() {
     currentRegionFilter = this.value;
@@ -382,21 +381,17 @@ function generateFilterSelect() {
   // =======================================================
   // KODE BARU: Pengendali Dropdown Kombinasi (Sort + Filter)
   // =======================================================
-  let selectKombinasi = document.getElementById('filter-sort-kombinasi');
+let selectKombinasi = document.getElementById('filter-sort-kombinasi');
   if (selectKombinasi) {
     selectKombinasi.addEventListener('change', function() {
       let pilihan = this.value;
 
-// 1. Reset kedua variabel ke kondisi bawaan (Pilih/Abjad)
+      // 1. Reset variabel ke kondisi bawaan
       currentUsiaFilter = 'all';
-      currentSortMode = 'alphabetical';
 
       // 2. Tentukan aksi berdasarkan opsi yang dipilih
       if (pilihan === 'filter-usia-50') {
-        currentUsiaFilter = 'usia_50'; // SEKARANG MENGGUNAKAN FILTER, BUKAN SORT
-      } 
-      else if (pilihan === 'sort-alpha') {
-        currentSortMode = 'alphabetical';
+        currentUsiaFilter = 'usia_50'; 
       } 
       else if (pilihan === 'filter-klaster') {
         currentUsiaFilter = 'klaster_penting';
@@ -404,7 +399,6 @@ function generateFilterSelect() {
       else if (pilihan === 'default') {
         // Biarkan saja, otomatis kembali ke semua data dan urut abjad
       }
-
       // 3. Eksekusi ulang tampilan
       applyIntersectionFilter();
     });
