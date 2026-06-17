@@ -71,7 +71,8 @@
     touch-action: none;
     -webkit-user-select: none;
     user-select: none;
-    background: #7d0d0d;
+   background-color: #822; 
+  background-image: linear-gradient(to bottom, #822, #6a1b1b);
   }
 
   #panel-handle:active {
@@ -91,8 +92,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #fff;
-    opacity: 0.85;
+    color: #bf9090;
   }
 
   /* ---------- Branding & navigasi lebih ringkas ---------- */
