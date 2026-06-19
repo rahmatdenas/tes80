@@ -12,11 +12,34 @@
 }
 
 /* 1. Atur container ul agar Index di kiri dan About di kanan */
+/* 1. Pengaturan Wadah Utama (Gabungan kode Anda) */
 nav ul {
   display: flex;
-  justify-content: space-between;
-  padding: 0; /* Sesuaikan angka 20px dengan jarak pinggir layout Anda */
   list-style: none;
+  margin: 0 20px;
+  padding: 0;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none; 
+}
+
+/* 2. Memaksa ketiga kolom berbagi ruang sama rata persis (33.33%) */
+nav ul li {
+  flex: 1; 
+}
+
+/* 3. Penyesuaian Perataan Teks Masing-masing Tombol */
+nav ul li:nth-child(1) {
+  text-align: left; 
+}
+
+nav ul li:nth-child(2) {
+  text-align: center;  
+}
+
+nav ul li:nth-child(3) {
+  text-align: right; 
 }
 
 /* 2. Ganti nav li a lama dengan ini (teks pudar, tanpa background) */
