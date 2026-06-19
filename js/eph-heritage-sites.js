@@ -641,92 +641,72 @@ function activateSite(qid) {
 }
 
 function generateRecordDetails(qid) {
-  let record = Records[qid];
-  let titleHtml = `<h1>${record.title}</h1>`;
+// 1. Buat tautan sunting
+let wikiUrlUtama = `https://www.wikidata.org/wiki/${qid}`;
+let tautanSuntingRingkasan = `<a href="${wikiUrlUtama}" target="_blank" class="sunting-link" title="Sunting data di Wikidata" aria-label="Sunting data di Wikidata"></a>`;
 
-  let figureHtml = generateFigure(record.imageFilename);
+// 2. Tutup tag <h2> terlebih dahulu, lalu letakkan tautan di luarnya
+let designationsHtml = `<h2>Ringkasan</h2>${tautanSuntingRingkasan}`;
+designationsHtml += '<ul class="designations">';
 
-  if (record.imageFilename) {
-    figureHtml = figureHtml.replace('<figure class="', '<figure class="gambar-utama ');
-  }
+let isFirstDesignation = true; // Mencegah duplikasi container peristiwa
 
-  let articleHtml;
-  if (record.articleTitle) {
-    articleHtml = '<div class="article main-text loading"><div class="loader"></div></div>';
-  }
-  else {
-    articleHtml = '<div class="article main-text nodata"><p>Situs ini belum memiliki artikel Wikipedia berbahasa Indonesia.</p></div>';
-  }
-  
-  let designationsHtml = '<h2>Ringkasan</h2>';
-  designationsHtml += '<ul class="designations">';
+Object.keys(record.designations)
+  .map(id => [id, DESIGNATION_TYPES[id].order]) 
+  .sort((a, b) => a[1] - b[1])
+  .map(item => item[0])
+  .forEach(designationQid => {
 
-  let isFirstDesignation = true; // Mencegah duplikasi container peristiwa
+    let type = DESIGNATION_TYPES[designationQid];
 
-  Object.keys(record.designations)
-    .map(qid => [qid, DESIGNATION_TYPES[qid].order]) 
-    .sort((a, b) => a[1] - b[1])
-    .map(item => item[0])
-    .forEach(designationQid => {
+    let infoTahunHtml = '';
+    
+    // Teks tahun berdiri sudah bersih dari ikon sunting
+    if (record.tahunBerdiri) {
+      infoTahunHtml = `<p>Didirikan: ${record.tahunBerdiri}</p>`;
+    } else {
+      infoTahunHtml = `<p>Didirikan: <span style="font-style: italic; color: #888;">Data belum tersedia</span></p>`;
+    }
 
-let type = DESIGNATION_TYPES[designationQid];
+    // --- LOGIKA LOKASI ANTI-DOBEL ---
+    let induk = type.name; 
+    let spesifik = record.lokasiSpesifik; 
+    let namaLokasi = induk; 
 
- let infoTahunHtml = '';
-// Siapkan URL yang mengarah ke bagian "Tanggal didirikan" (P571)
-let wikiUrlTahun = `https://www.wikidata.org/wiki/${qid}#P571`; 
+    if (spesifik && spesifik.toLowerCase() !== induk.toLowerCase()) {
+      namaLokasi = `${spesifik}, ${induk}`; 
+    }
 
-if (record.tahunBerdiri) {
-  let tautanSunting = `<a href="${wikiUrlTahun}" target="_blank" class="sunting-link" title="Sunting tahun berdiri di Wikidata"></a>`;
-  infoTahunHtml = `<p>Berdiri sejak: ${record.tahunBerdiri}${tautanSunting}</p>`;
-} else {
-  // Wikipedia juga menggunakan ikon pensil yang sama untuk mengisi data kosong di infobox
-  let tautanTambah = `<a href="${wikiUrlTahun}" target="_blank" class="sunting-link" title="Tambahkan tahun berdiri di Wikidata"></a>`;
-  infoTahunHtml = `<p>Didirikan: <span style="font-style: italic; color: #888;">Data belum tersedia</span>${tautanTambah}</p>`;
-}
+    let infoLokasiHtml = '';
 
-      // --- LOGIKA LOKASI ANTI-DOBEL ---
-      let induk = type.name; 
-      let spesifik = record.lokasiSpesifik; 
-      let namaLokasi = induk; // Default: "Kota Padang"
+    if (record.lat && record.lon) {
+      let mapsUrl = `https://www.google.com/maps?q=${record.lat},${record.lon}`;
+      infoLokasiHtml = `<p class="koordinat-link">Terletak di <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" title="Buka di Google Maps">${namaLokasi}</a></p>`;
+    } else {
+      infoLokasiHtml = `<p class="koordinat-link">Terletak di: ${namaLokasi}</p>`;
+    }
+    
+    // --- LOADER VISUAL ---
+    let eventsHtmlPlaceholder = '';
+    if (isFirstDesignation) {
+      eventsHtmlPlaceholder = `
+        <div id="events-container-${qid}" class="loading" style="margin-top: 8px; min-height: 24px;">
+          <div class="loader" style="width: 20px; height: 20px; border-width: 2px; margin: 0;"></div>
+        </div>`;
+      isFirstDesignation = false;
+    }
 
-      // Jika data kecamatan/nagari ada, DAN tidak dobel/identik dengan nama kabupaten/kota (abaikan huruf besar/kecil)
-      if (spesifik && spesifik.toLowerCase() !== induk.toLowerCase()) {
-        namaLokasi = `${spesifik}, ${induk}`; // Contoh hasil: "Kecamatan Banuhampu, Kabupaten Agam"
-      }
-
-      let infoLokasiHtml = '';
-
-      if (record.lat && record.lon) {
-        // Tautan Google Maps baku
-        let mapsUrl = `https://www.google.com/maps?q=${record.lat},${record.lon}`;
-        infoLokasiHtml = `<p class="koordinat-link">Terletak di <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" title="Buka di Google Maps">${namaLokasi}</a></p>`;
-      } else {
-        infoLokasiHtml = `<p class="koordinat-link">Terletak di: ${namaLokasi}</p>`;
-      }
+    designationsHtml +=
+      '<li>' +
+        '<div class="org">' +
+          `<img src="img/org_logo_${type.org.toLowerCase()}.svg">` + 
+        '</div>' +
+        infoLokasiHtml + 
+        infoTahunHtml +
+        eventsHtmlPlaceholder + 
+      '</li>';
       
-      // --- LOADER VISUAL KEMBALI DI SINI ---
-      let eventsHtmlPlaceholder = '';
-      if (isFirstDesignation) {
-        // Kontainer utama (wajib ada agar JS bisa menyuntikkan <p> ke mari) dilengkapi animasi loader mini
-        eventsHtmlPlaceholder = `
-          <div id="events-container-${qid}" class="loading" style="margin-top: 8px; min-height: 24px;">
-            <div class="loader" style="width: 20px; height: 20px; border-width: 2px; margin: 0;"></div>
-          </div>`;
-        isFirstDesignation = false;
-      }
-      // -------------------------------------
-
-      designationsHtml +=
-        '<li>' +
-          '<div class="org">' +
-            `<img src="img/org_logo_${type.org.toLowerCase()}.svg">` + 
-          '</div>' +
-          infoLokasiHtml + 
-          infoTahunHtml +
-          eventsHtmlPlaceholder + // Placeholder peristiwa & loader disisipkan di sini
-        '</li>';
-        
-    });
+});
     
   designationsHtml += '</ul>';
 
