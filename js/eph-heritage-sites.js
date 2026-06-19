@@ -529,7 +529,9 @@ function updateFeatureCounts(totalValidRecords) {
   let btnImg = document.getElementById('btn-image') || document.querySelector('[data-filter="image"]');
   let btnArt = document.getElementById('btn-article') || document.querySelector('[data-filter="article"]');
 
-  if (btnAll) btnAll.textContent = 'Semua Hasil';
+  // BARIS DI BAWAH INI KITA HAPUS/KOMENTAR KARENA TEKS SEKARANG DIATUR OTOMATIS
+  // if (btnAll) btnAll.textContent = 'Semua Hasil'; 
+  
   if (btnImg) btnImg.textContent = 'Memiliki Gambar';
   if (btnArt) btnArt.textContent = 'Memiliki Artikel';
 
@@ -547,17 +549,26 @@ function applyIntersectionFilter(preventZoom = false) {
   ol.innerHTML = '';
 
   let validMarkers = [];
+  
+  // === LOGIKA STATUS & TEKS TOMBOL RESET ===
   let btnAll = document.getElementById('btn-all');
   if (btnAll) {
     if (currentSearchQuery.trim() === '' && 
         currentRegionFilter === 'all' && 
         currentUsiaFilter === 'all' && 
         activeFeatures.size === 0) {
+      
       btnAll.classList.add('active');
+      btnAll.textContent = 'Semua Hasil'; // Teks saat bawaan
+      
     } else {
+      
       btnAll.classList.remove('active');
+      btnAll.textContent = 'Reset'; // Teks saat filter sedang dipakai
+      
     }
   }
+
   let validRecords = Object.values(Records).filter(record => {
     let matchRegion = (currentRegionFilter === 'all' || record.areaTags.has(currentRegionFilter));
     let matchFeature = true;
