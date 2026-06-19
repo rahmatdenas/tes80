@@ -251,7 +251,6 @@ optgroup option {
   background-size: 20px 20px;
   background-position: center;
   background-repeat: no-repeat;
-  background-color: red;
   cursor: pointer;
   margin: 0 -15px 0 0px; 
 }
