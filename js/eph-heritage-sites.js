@@ -861,13 +861,15 @@ function renderHistoricalImagesInPanel(qid) {
 
   let html = '';
   
-  function buildImageBlock(imgObj) {
+  // 1. Tambahkan parameter 'teksPengganti' di sini
+  function buildImageBlock(imgObj, teksPengganti) {
     let block = '<div class="arsip-block" style="overflow: hidden; margin-bottom: 10px;">';
     block += generateFigure(imgObj.file);
     if (imgObj.caption && imgObj.caption.trim() !== '') {
       block += `<div class="article main-text"><p>${imgObj.caption}</p></div>`;
     } else {
-      block += `<div class="article main-text nodata"><p>Belum ada keterangan foto di Wikidata.</p></div>`;
+      // 2. Cetak teks pengganti sesuai yang dikirim
+      block += `<div class="article main-text nodata"><p>${teksPengganti}</p></div>`;
     }
     block += '</div>';
     return block;
@@ -875,20 +877,20 @@ function renderHistoricalImagesInPanel(qid) {
 
   // Render Pemandangan Masa Lalu
   if (record.pastImage) {
-    html += buildImageBlock(record.pastImage);
+    // 3. Kirim teks khusus untuk Masa Lalu
+    html += buildImageBlock(record.pastImage, 'Suasana/bentuk/tampilan sebelumnya');
   }
 
   // === RENDER PEMANDANGAN DALAM (INTERIOR) ===
   if (record.interiorImage) {
-    html += '<h3 style="margin: 15px 0 5px; font-size: 15px; color:#555;">Pemandangan Dalam</h3>';
-    html += buildImageBlock(record.interiorImage);
+    html += buildImageBlock(record.interiorImage, 'Pemandangan di dalam');
   }
   
   // Render Pemandangan Sekitar
   if (record.vicinityImages && record.vicinityImages.length > 0) {
-    html += '<h3 style="margin: 15px 0 5px; font-size: 15px; color:#555;">Lingkungan Sekitar</h3>';
     record.vicinityImages.forEach(imgObj => {
-      html += buildImageBlock(imgObj);
+      // 5. Kirim teks khusus untuk Sekitar
+      html += buildImageBlock(imgObj, 'Objek di sekitar');
     });
   }
 
