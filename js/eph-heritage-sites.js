@@ -868,7 +868,6 @@ let wikiUrlUtama = `https://www.wikidata.org/wiki/${qid}`;
   else if (currentKategoriUtama === 'alam') {
 
     prefixLokasi = `${currentNamaKlaster} khas`;
-    prefixLokasi = 'Lokasi'; 
     showTahun = false; 
   }
   else if (['Wilayah Administratif'].includes(currentNamaKlaster)) { 
