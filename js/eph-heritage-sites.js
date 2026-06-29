@@ -572,9 +572,16 @@ if (record.dynamicProps && Object.keys(record.dynamicProps).length > 0) {
         let angkaRapi = parseInt(angka).toLocaleString('id-ID');
         formattedValue = tahun !== 'null' ? `${angkaRapi} jiwa (${tahun})` : `${angkaRapi} jiwa`;
       } 
-      else if (key === 'kepalaDaerah') {
-        let [nama, tahun] = rawValue.split('|');
-        formattedValue = tahun !== 'null' ? `${nama} (sejak ${tahun})` : nama;
+else if (key === 'kepalaDaerah') {
+        let [nama, tahun, wikiUrl] = rawValue.split('|');
+        
+        // Buat teks nama biasa, lalu timpa menjadi link jika wikiUrl ditemukan
+        let teksNama = nama;
+        if (wikiUrl && wikiUrl !== 'kosong') {
+          teksNama = `<span class="koordinat-link"><a href="${wikiUrl}" target="_blank" rel="noopener noreferrer">${nama}</a></span>`;
+        }
+
+        formattedValue = tahun !== 'null' ? `${teksNama} (sejak ${tahun})` : teksNama;
       }
       else if (key === 'luas') {
         let [angka, satuan, bagian] = rawValue.split('|');
@@ -624,9 +631,9 @@ if (urlWikibooks) {
     
     if (arsipContainer) {
       let wikibooksHtml = `
-        <div style="margin-top:20px;">
-          <h2 style="margin-bottom:10px;">Resep & Panduan</h2>
-          <p class="wikipedia-link" style="margin-bottom: 0;">
+        <div style="margin-top:0px;">
+          <h2 style="margin-bottom:0px;">Resep & Panduan</h2>
+          <p class="wikipedia-link" style="padding-bottom: 5px;">
             <a href="${urlWikibooks}" target="_blank">
               <img src="img/wikibook_tiny_logo.png" alt="" />
               <span>Lihat di Wikibuku</span>
