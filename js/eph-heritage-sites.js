@@ -113,7 +113,6 @@ function tentukanKategoriKueri(inputTxt) {
   // Kategori Alam (Semua ini akan mematikan fitur "Didirikan")
 const kelompokAlam = [
     'Q34770', // Bahasa
-    'Q47461344', 'Q7725634', // Publikasi
     'Q19861951', 'Q746549', 'Q2095', 'Q8195619', // Hidangan
     'Q11460', 'Q3172759', 'Q28823', // Pakaian
     'Q107357104', 'Q184485', // Tari & Pertunjukan
