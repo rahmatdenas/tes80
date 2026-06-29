@@ -3,31 +3,48 @@
 const BASE_TITLE = 'WikiJelajah';
 
 const KUMPULAN_KUERI_0 = {
-  'universal': `SELECT DISTINCT ?siteQid ?siteLabel ?provinsiQid ?provinsiLabel ?p131LokasiLabel ?tahunBerdiriMentah ?tahunPresisi
-  WHERE {
-    VALUES ?jenis { <PLACEHOLDER_JENIS> } 
-    
+  'universal': `SELECT DISTINCT ?site ?siteLabel ?p131Lokasi ?p131LokasiLabel ?p131Image ?provinsi (SAMPLE(?tahunVal) AS ?tahunBerdiriMentah) (SAMPLE(?tahunPrec) AS ?tahunPresisi) WHERE {
     <PLACEHOLDER_KURUNG_BUKA>
-      <PLACEHOLDER_WILAYAH_1>
-      ?site wdt:P31 ?jenis ;
-            wdt:<PLACEHOLDER_PROP_LOKASI> ?p131Lokasi .
+      VALUES ?jenis { <PLACEHOLDER_JENIS> }
+      ?site wdt:P31 ?jenis .
+      ?site wdt:<PLACEHOLDER_PROP_LOKASI> ?p131Lokasi .
       <PLACEHOLDER_HIERARKI_LOKASI>
+      <PLACEHOLDER_WILAYAH_1>
+    <PLACEHOLDER_UNION_EKSTRA>
     <PLACEHOLDER_KURUNG_TUTUP>
     
-    <PLACEHOLDER_UNION_EKSTRA>
-    
-    OPTIONAL { 
-      ?site p:<PLACEHOLDER_PROP_TAHUN> ?inceptionStmt .
-      ?inceptionStmt psv:<PLACEHOLDER_PROP_TAHUN> ?inceptionNode .
-      ?inceptionNode wikibase:timeValue ?tahunBerdiriMentah ;
-                     wikibase:timePrecision ?tahunPresisi .
+    OPTIONAL {
+      ?site p:<PLACEHOLDER_PROP_TAHUN> ?tahunStmt .
+      ?tahunStmt psv:<PLACEHOLDER_PROP_TAHUN> ?tahunNode .
+      ?tahunNode wikibase:timeValue ?tahunVal ;
+                 wikibase:timePrecision ?tahunPrec .
     }
-    
-    BIND(SUBSTR(STR(?site), 32) AS ?siteQid) .
-    BIND(SUBSTR(STR(?provinsi), 32) AS ?provinsiQid) .
-    
+    OPTIONAL { ?p131Lokasi wdt:P18 ?p131Image . }
     SERVICE wikibase:label { bd:serviceParam wikibase:language "id". }
-  }`
+  } GROUP BY ?site ?siteLabel ?p131Lokasi ?p131LokasiLabel ?p131Image ?provinsi`,
+
+  // === TEMPLAT BARU: LOKASI OPTIONAL TAPI WAJIB INDONESIA ===
+  'khusus_negara_all': `SELECT DISTINCT ?site ?siteLabel ?p131Lokasi ?p131LokasiLabel ?p131Image ?provinsi (SAMPLE(?tahunVal) AS ?tahunBerdiriMentah) (SAMPLE(?tahunPrec) AS ?tahunPresisi) WHERE {
+    VALUES ?jenis { <PLACEHOLDER_JENIS> }
+    ?site wdt:P31 ?jenis .
+    ?site wdt:P17 wd:Q252 . # SYARAT MUTLAK: HARUS DI INDONESIA
+
+    # BUNGKUS PENCARIAN LOKASI DALAM OPTIONAL AGAR TIDAK WAJIB
+    OPTIONAL {
+      ?site wdt:<PLACEHOLDER_PROP_LOKASI> ?p131Lokasi .
+      <PLACEHOLDER_HIERARKI_LOKASI>
+      <PLACEHOLDER_WILAYAH_1>
+    }
+
+    OPTIONAL {
+      ?site p:<PLACEHOLDER_PROP_TAHUN> ?tahunStmt .
+      ?tahunStmt psv:<PLACEHOLDER_PROP_TAHUN> ?tahunNode .
+      ?tahunNode wikibase:timeValue ?tahunVal ;
+                 wikibase:timePrecision ?tahunPrec .
+    }
+    OPTIONAL { ?p131Lokasi wdt:P18 ?p131Image . }
+    SERVICE wikibase:label { bd:serviceParam wikibase:language "id". }
+  } GROUP BY ?site ?siteLabel ?p131Lokasi ?p131LokasiLabel ?p131Image ?provinsi`
 };
 
 const KUMPULAN_KUERI_1 = {
