@@ -306,8 +306,10 @@ if (klaster === 'Wilayah Administratif') {
   // ==========================================
   // BLOK 4: ATRIBUT FISIK, MATERIAL & PENCIPTA (BARU)
   // ==========================================
-  if (['Prasasti', 'Situs arkeologi', 'Artefak', 'Lontar', 'Naskah', 'Lukisan'].includes(klaster)) {
-    selectClause += `(SAMPLE(?penciptaLabel) AS ?pencipta) (SAMPLE(?panjangData) AS ?panjang) (SAMPLE(?tinggiData) AS ?tinggi) (GROUP_CONCAT(DISTINCT ?bahanLabel; separator=", ") AS ?bahanList) (GROUP_CONCAT(DISTINCT ?aksaraLabel; separator=", ") AS ?aksaraList) `;
+if (['Prasasti', 'Situs arkeologi', 'Artefak', 'Lontar', 'Naskah', 'Lukisan'].includes(klaster)) {
+    // Tambahkan ?lebar pada selectClause
+    selectClause += `(SAMPLE(?penciptaLabel) AS ?pencipta) (SAMPLE(?panjangData) AS ?panjang) (SAMPLE(?lebarData) AS ?lebar) (SAMPLE(?tinggiData) AS ?tinggi) (GROUP_CONCAT(DISTINCT ?bahanLabel; separator=", ") AS ?bahanList) (GROUP_CONCAT(DISTINCT ?aksaraLabel; separator=", ") AS ?aksaraList) `;
+    
     whereClause += `
       # Pencipta (P170)
       OPTIONAL { ?site wdt:P170 ?penciptaItem . ?penciptaItem rdfs:label ?penciptaLabel . FILTER(LANG(?penciptaLabel) = "id") }
@@ -323,6 +325,19 @@ if (klaster === 'Wilayah Administratif') {
           FILTER(LANG(?pjgUnitLabel) = "id") 
         }
         BIND(CONCAT(STR(?pjgVal), "|", IF(BOUND(?pjgUnitLabel), ?pjgUnitLabel, "")) AS ?panjangData)
+      }
+
+      # Lebar (P2049) + Satuan
+      OPTIONAL {
+        ?site p:P2049 ?lbrStmt .
+        ?lbrStmt psv:P2049 ?lbrNode .
+        ?lbrNode wikibase:quantityAmount ?lbrVal .
+        OPTIONAL { 
+          ?lbrNode wikibase:quantityUnit ?lbrUnitItem . 
+          ?lbrUnitItem rdfs:label ?lbrUnitLabel . 
+          FILTER(LANG(?lbrUnitLabel) = "id") 
+        }
+        BIND(CONCAT(STR(?lbrVal), "|", IF(BOUND(?lbrUnitLabel), ?lbrUnitLabel, "")) AS ?lebarData)
       }
 
       # Tinggi (P2048) + Satuan
