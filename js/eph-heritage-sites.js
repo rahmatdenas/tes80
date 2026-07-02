@@ -297,7 +297,7 @@ if (provInput === 'all') {
 
   console.log("Kueri 0 (Tipe & Provinsi) yang dikirim:", dynamicQuery);
 
-  return queryWdqsThenProcess(
+  return queryWdqsPaginated(
     dynamicQuery,
 function(result) {
       // Menggunakan variabel JSON singkatan hasil kueri baru
@@ -330,9 +330,9 @@ function(result) {
       populateProvinceIndex(); 
       Object.values(Records).forEach(record => { record.indexTitle = record.title });
     },
+    5000  // ukuran halaman
   );
 }
-
 function populateCoordinatesData() {
   let daftarQid = Object.keys(Records).map(id => 'wd:' + id);
   if (daftarQid.length === 0) return Promise.resolve();
