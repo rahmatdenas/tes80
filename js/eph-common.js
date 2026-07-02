@@ -351,36 +351,23 @@ async function queryWdqsPaginated(queryTemplate, processEachResult, postprocessC
       `LIMIT ${chunkSize} OFFSET ${offset}`
     );
 
-    // === LOG DEBUG 1: pastikan placeholder benar-benar ketemu dan tergantikan ===
-    console.log(`[Halaman ${halaman}] Offset: ${offset}`);
-    console.log(`[Halaman ${halaman}] Placeholder berhasil diganti?`, pagedQuery.includes('LIMIT ' + chunkSize));
-    console.log(`[Halaman ${halaman}] Query terkirim:`, pagedQuery);
-
-    let bindings;
-    try {
-      bindings = await fetchWdqsRawWithRetry(pagedQuery);
-    } catch (err) {
-      console.error(`[Halaman ${halaman}] GAGAL total:`, err);
-      throw err;
-    }
-
-    console.log(`[Halaman ${halaman}] Baris mentah diterima:`, bindings.length);
-
+    let bindings = await fetchWdqsRawWithRetry(pagedQuery);
     bindings.forEach(processEachResult);
 
-    let entitasUnik = new Set(bindings.map(b => b.SQ.value)).size;
-    console.log(`[Halaman ${halaman}] Entitas unik (?SQ):`, entitasUnik);
+    // Hitung kombinasi unik (s,p,l) — ini representasi PERSIS baris subquery,
+    // bukan jumlah entitas ?s unik (yang bisa lebih kecil kalau ada multi-?p per ?s)
+    let kombinasiUnik = new Set(
+      bindings.map(b => `${b.SQ.value}|${b.PQ ? b.PQ.value : ''}|${b.LQ ? b.LQ.value : ''}`)
+    ).size;
 
-    if (entitasUnik < chunkSize) {
-      console.log(`[Halaman ${halaman}] STOP — dianggap halaman terakhir.`);
-      break;
-    }
+    console.log(`[Halaman ${halaman}] Kombinasi (s,p,l) unik:`, kombinasiUnik);
+
+    if (kombinasiUnik < chunkSize) break; // baru ini benar-benar halaman terakhir
 
     offset += chunkSize;
     halaman++;
   }
 
-  console.log('SELESAI. Total Records terkumpul:', Object.keys(Records).length);
   if (postprocessCallback) postprocessCallback();
 }
 
