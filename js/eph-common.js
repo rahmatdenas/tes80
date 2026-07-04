@@ -145,7 +145,7 @@ let searchInput = document.getElementById('search-input');
   let btnAll = document.getElementById('btn-all');
   if (btnAll) {
     btnAll.classList.add('active');
-    btnAll.textContent = 'Pilih Hasil';
+    btnAll.textContent = 'Semua Hasil';
   }
   document.querySelectorAll('.feat-btn:not(#btn-all)').forEach(b => {
     b.classList.remove('active');
@@ -690,31 +690,43 @@ function updateNavigationUI(fragment) {
     let currentIndex = currentFilteredRecords.findIndex(r => r === Records[fragment]);
     
     // KUNCI PERBAIKAN: Jika dipanggil dari URL tapi tersembunyi oleh filter, reset filternya!
-    if (currentIndex === -1) {
+if (currentIndex === -1) {
        let btnAll = document.getElementById('btn-all');
        if (btnAll) btnAll.click();
        currentIndex = currentFilteredRecords.findIndex(r => r === Records[fragment]);
     }
     
-    // Konfigurasi Tombol '<<' (Sebelumnya) - MENGGUNAKAN .id LANGSUNG
-    if (currentIndex > 0) {
-      let prevQid = currentFilteredRecords[currentIndex - 1].id;
+    // ========================================================
+    // LOGIKA BARU: TOMBOL LOOPING (KORSEL)
+    // ========================================================
+    let totalItems = currentFilteredRecords.length;
+
+    // Tombol hanya hidup jika jumlah data lebih dari 1
+    if (totalItems > 1 && currentIndex !== -1) {
+      // 1. Tentukan indeks berputar
+      let prevIndex = (currentIndex === 0) ? (totalItems - 1) : (currentIndex - 1);
+      let nextIndex = (currentIndex === totalItems - 1) ? 0 : (currentIndex + 1);
+
+      // 2. Ambil Q-ID masing-masing
+      let prevQid = currentFilteredRecords[prevIndex].id;
+      let nextQid = currentFilteredRecords[nextIndex].id;
+
+      // 3. Nyalakan dan pasang tautan tombol '<<'
       btnPrev.href = '#' + prevQid;
       btnPrev.style.opacity = '1';
       btnPrev.style.pointerEvents = 'auto';
-    } else {
-      btnPrev.removeAttribute('href');
-      btnPrev.style.opacity = '0.3';
-      btnPrev.style.pointerEvents = 'none';
-    }
 
-    // Konfigurasi Tombol '>>' (Selanjutnya) - MENGGUNAKAN .id LANGSUNG
-    if (currentIndex !== -1 && currentIndex < currentFilteredRecords.length - 1) {
-      let nextQid = currentFilteredRecords[currentIndex + 1].id;
+      // 4. Nyalakan dan pasang tautan tombol '>>'
       btnNext.href = '#' + nextQid;
       btnNext.style.opacity = '1';
       btnNext.style.pointerEvents = 'auto';
+      
     } else {
+      // Matikan kedua tombol HANYA JIKA hasil filter cuma ada 1 data (tidak bisa ke mana-mana)
+      btnPrev.removeAttribute('href');
+      btnPrev.style.opacity = '0.3';
+      btnPrev.style.pointerEvents = 'none';
+
       btnNext.removeAttribute('href');
       btnNext.style.opacity = '0.3';
       btnNext.style.pointerEvents = 'none';
